@@ -67,142 +67,148 @@ class DetailPageState extends State<DetailPage> {
           title: const Text("scu market"),
         ),
         body: Container(
-          decoration: const BoxDecoration(color: Colors.grey),
-          child: Column(
-            children: [
-              Row(
+            height: MediaQuery.of(context).size.height - 100,
+            decoration: const BoxDecoration(color: Colors.grey),
+            child: SingleChildScrollView(
+              child: Column(
                 children: [
-                  SizedBox(
-                    width: 50,
-                    height: 50,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(25),
-                      child: headImage,
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 50,
+                        height: 50,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(25),
+                          child: headImage,
+                        ),
+                      ),
+                      Expanded(
+                          child: Text(
+                        "${(message["user"]["nickname"])} ",
+                        style: const TextStyle(fontSize: 20),
+                        overflow: TextOverflow.fade,
+                      )),
+                      Text(
+                        "${message["user"]["leaver_name"]}",
+                        style: const TextStyle(
+                          color: Colors.black,
+                          backgroundColor: Colors.green,
+                        ),
+                      )
+                    ],
+                  ),
+                  // 标题
+                  Row(
+                    children: [
+                      Expanded(
+                          child: Text(
+                        "${message["title"]}",
+                        style: const TextStyle(fontSize: 25),
+                        overflow: TextOverflow.fade,
+                      ))
+                    ],
+                  ),
+                  // 内容
+                  Container(
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Row(
+                      children: [
+                        Expanded(
+                            child: Text(
+                          "${message["content"]}",
+                          overflow: TextOverflow.fade,
+                          style: const TextStyle(fontSize: 18),
+                        ))
+                      ],
                     ),
                   ),
-                  Expanded(
-                      child: Text(
-                    "${(message["user"]["nickname"])} ",
-                    style: const TextStyle(fontSize: 20),
-                    overflow: TextOverflow.fade,
-                  )),
-                  Text(
-                    "${message["user"]["leaver_name"]}",
-                    style: const TextStyle(
-                      color: Colors.black,
-                      backgroundColor: Colors.green,
-                    ),
-                  )
-                ],
-              ),
-              // 标题
-              Row(
-                children: [
-                  Expanded(
-                      child: Text(
-                    "${message["title"]}",
-                    style: const TextStyle(fontSize: 25),
-                    overflow: TextOverflow.fade,
-                  ))
-                ],
-              ),
-              // 内容
-              Container(
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10)),
-                child: Row(
-                  children: [
-                    Expanded(
-                        child: Text(
-                      "${message["content"]}",
-                      overflow: TextOverflow.fade,
-                      style: const TextStyle(fontSize: 18),
-                    ))
-                  ],
-                ),
-              ),
-              imageNums == 0
-                  ? const Divider()
-                  : Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Container(
-                        decoration: BoxDecoration(color: Colors.teal,borderRadius: BorderRadius.circular(15)),
-                        height: 270,
-                        child: ListView.builder(
-                          addAutomaticKeepAlives: true,
-                            itemCount: imageNums,
-                            itemBuilder: (context, index) {
-                              return Container(
-                                width: 150,
-                                height: 150,
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10)),
-                                child: Padding(
-                                    padding: const EdgeInsets.all(10),
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                HeroPhotoViewWrapper(
-                                              imageProvider: NetworkImage(
-                                                  message['images'][index]),
+                  imageNums == 0
+                      ? const Divider()
+                      : Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Container(
+                            decoration: BoxDecoration(
+                                color: Colors.teal,
+                                borderRadius: BorderRadius.circular(15)),
+                            child: ListView.builder(
+                                addAutomaticKeepAlives: true,
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: imageNums,
+                                itemBuilder: (context, index) {
+                                  return Container(
+                                    width: 150,
+                                    decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    child: Padding(
+                                        padding: const EdgeInsets.all(10),
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    HeroPhotoViewWrapper(
+                                                  imageProvider: NetworkImage(
+                                                      message['images'][index]),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                          child: Hero(
+                                            tag: message['images'][index],
+                                            child: Image.network(
+                                              message['images'][index],
+                                              fit: BoxFit.fitWidth,
                                             ),
                                           ),
-                                        );
-                                      },
-                                      child: Hero(
-                                        tag: message['images'][index],
-                                        child: Image.network(
-                                          message['images'][index],
-                                          fit: BoxFit.fitWidth,
-                                        ),
-                                      ),
-                                    )),
-                              );
-                            }),
-                      )),
-              Row(
-                children: [
-                  const Icon(Icons.image),
-                  Expanded(
-                      child: Text(
-                    "$imageNums张图片  ${message['school']['name']}  #${message['classify']['name']}",
-                    overflow: TextOverflow.fade,
-                  ))
-                ],
-              ),
-              Row(
-                children: [
-                  const Icon(Icons.remove_red_eye),
-                  Text("${message['reading']}次浏览"),
-                  Expanded(
-                      child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                                        )),
+                                  );
+                                }),
+                          )),
+                  Row(
                     children: [
-                      const Icon(
-                        Icons.thumb_up,
-                        size: 20,
-                      ),
-                      Text("${message['art_like']}"),
-                      const Icon(
-                        Icons.message,
-                        size: 20,
-                      ),
-                      Text("${message['comment_count']}"),
+                      const Icon(Icons.image),
+                      Expanded(
+                          child: Text(
+                        "$imageNums张图片  ${message['school']['name']}  #${message['classify']['name']}",
+                        overflow: TextOverflow.fade,
+                      ))
                     ],
-                  ))
-                ],
-              ),
-              const Text(
-                "评论",
-                style: TextStyle(fontSize: 20, color: Colors.white),
-              ),
-              Expanded(
-                  child: ListView.builder(
+                  ),
+                  Row(
+                    children: [
+                      const Icon(Icons.remove_red_eye),
+                      Text("${message['reading']}次浏览"),
+                      Expanded(
+                          child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          const Icon(
+                            Icons.thumb_up,
+                            size: 20,
+                          ),
+                          Text("${message['art_like']}"),
+                          const Icon(
+                            Icons.message,
+                            size: 20,
+                          ),
+                          Text("${message['comment_count']}"),
+                        ],
+                      ))
+                    ],
+                  ),
+                  const Text(
+                    "评论",
+                    style: TextStyle(fontSize: 20, color: Colors.white),
+                  ),
+                  ListView.builder(
+                      shrinkWrap: true,
                       itemCount: remarks.length,
+                      physics: const NeverScrollableScrollPhysics(),
                       itemBuilder: (context, index) {
                         var remark = remarks[index];
                         return Padding(
@@ -229,7 +235,9 @@ class DetailPageState extends State<DetailPage> {
                                     ),
                                     Text(
                                       "${remark['user']['nickname']} ",
-                                      style: const TextStyle(fontSize: 20,color: Colors.blueAccent),
+                                      style: const TextStyle(
+                                          fontSize: 20,
+                                          color: Colors.blueAccent),
                                     ),
                                     Text(
                                       "${remark["user"]["leaver_name"]}",
@@ -256,10 +264,10 @@ class DetailPageState extends State<DetailPage> {
                             ),
                           ),
                         );
-                      }))
-            ],
-          ),
-        ));
+                      })
+                ],
+              ),
+            )));
   }
 }
 

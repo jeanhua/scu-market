@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:scu_market/Core.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'detailPage.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,20 +16,87 @@ class MyApp extends StatelessWidget {
     // TODO: implement build
     return MaterialApp(
       title: "SCU market",
-      home: HomePage(),
+      home: IndexPage(),
     );
   }
 }
 
-class HomePage extends StatefulWidget {
+class IndexPage extends StatefulWidget{
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
-    return HomePageState();
+    return IndexPageState();
   }
 }
 
-class HomePageState extends State<HomePage> {
+class IndexPageState extends State<IndexPage>{
+
+  //底部导航栏
+  final List<BottomNavigationBarItem> bottomNavItems = [
+    const BottomNavigationBarItem(
+        backgroundColor: Colors.blue,
+        icon: Icon(Icons.home),
+        label: "帖子"
+    ),
+    const BottomNavigationBarItem(
+        backgroundColor: Colors.blue,
+        icon: Icon(Icons.money),
+        label: "资源"
+    ),
+    const BottomNavigationBarItem(
+        backgroundColor: Colors.blue,
+        icon: Icon(Icons.money),
+        label: "画廊"
+    ),
+  ];
+
+  int currentIndex = 0;
+  final pages = [const marketPage(), const resPage(),const galleryPage()];
+  @override
+  void initState() {
+    super.initState();
+    currentIndex = 0;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("SCU market"),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: bottomNavItems,
+        currentIndex: currentIndex,
+        type: BottomNavigationBarType.shifting,
+        onTap: (index) {
+          _changePage(index);
+        },
+      ),
+      body: pages[currentIndex],
+    );
+  }
+
+  /*切换页面*/
+  void _changePage(int index) {
+    /*如果点击的导航项不是当前项  切换 */
+    if (index != currentIndex) {
+      setState(() {
+        currentIndex = index;
+      });
+    }
+  }
+}
+
+class marketPage extends StatefulWidget {
+  const marketPage({super.key});
+  @override
+  State<StatefulWidget> createState() {
+    // TODO: implement createState
+    return marketPageState();
+  }
+}
+
+class marketPageState extends State<marketPage> {
   int messageSize = 15;
   ScrollController messageViewController = ScrollController();
   var loadingContext = null;
@@ -201,85 +271,226 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("SCU market"),
+    return Stack(
+      children: [
+        Container(
+          decoration: const BoxDecoration(
+            color: Colors.blueAccent,
+          ),
+          child: RefreshIndicator(
+              onRefresh: refresh,
+              child: ListView.builder(
+                  controller: messageViewController,
+                  itemCount: Core.message.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index == Core.message.length - 1) {
+                      messageSize += 10;
+                      Core.getMessage(messageSize);
+                    }
+                    if(index == Core.message.length){
+                      return const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [CircularProgressIndicator()],
+                      );
+                    }
+                    else{
+                      return MessageItem(Core.message[index]);
+                    }
+                  })),
+        ),
+        Positioned(
+          right: 0,
+          bottom: 50,
+          child: Container(
+            decoration: BoxDecoration(
+                color: const Color.fromARGB(150, 255, 255, 255),
+                borderRadius: BorderRadius.circular(50),
+                boxShadow: const [
+                  BoxShadow(color: Colors.transparent, blurRadius: 5)
+                ]),
+            child: IconButton(
+                onPressed: () {
+                  refresh();
+                },
+                icon: const Icon(
+                  Icons.refresh,
+                  size: 50,
+                  color: Colors.redAccent,
+                )),
+          ),
+        ),
+        Positioned(
+          right: 0,
+          bottom: 130,
+          child: Container(
+            decoration: BoxDecoration(
+                color: const Color.fromARGB(150, 255, 255, 255),
+                borderRadius: BorderRadius.circular(50),
+                boxShadow: const [
+                  BoxShadow(color: Colors.transparent, blurRadius: 5)
+                ]),
+            child: IconButton(
+                onPressed: () {
+                  messageViewController.animateTo(
+                    0,
+                    duration: const Duration(seconds: 1),
+                    curve: Curves.easeInOut,
+                  );
+                },
+                icon: const Icon(
+                  Icons.arrow_upward,
+                  size: 50,
+                  color: Colors.redAccent,
+                )),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+
+class resPage extends StatefulWidget{
+  const resPage({super.key});
+  @override
+  State<StatefulWidget> createState() {
+    // TODO: implement createState
+    return resPageState();
+  }
+}
+
+class resPageState extends State<resPage>{
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+   webviewController.setJavaScriptMode(JavaScriptMode.unrestricted);
+  }
+
+  var webviewController = WebViewController()
+    ..setJavaScriptMode(JavaScriptMode.unrestricted)
+    ..setNavigationDelegate(
+      NavigationDelegate(
+        onProgress: (int progress) {
+          // Update loading bar.
+        },
+        onPageStarted: (String url) {},
+        onPageFinished: (String url) {},
+        onHttpError: (HttpResponseError error) {},
+        onWebResourceError: (WebResourceError error) {},
+        onNavigationRequest: (NavigationRequest request) {
+          return NavigationDecision.navigate;
+        },
       ),
-      body: Stack(
-        children: [
-          Container(
-            decoration: const BoxDecoration(
-              color: Colors.blueAccent,
-            ),
-            child: RefreshIndicator(
-                onRefresh: refresh,
-                child: ListView.builder(
-                    controller: messageViewController,
-                    itemCount: Core.message.length + 1,
-                    itemBuilder: (context, index) {
-                      if (index == Core.message.length - 1) {
-                        messageSize += 10;
-                        Core.getMessage(messageSize);
-                      }
-                      if(index == Core.message.length){
-                        return const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [CircularProgressIndicator()],
-                        );
-                      }
-                      else{
-                        return MessageItem(Core.message[index]);
-                      }
-                    })),
-          ),
-          Positioned(
-            right: 0,
-            bottom: 50,
-            child: Container(
-              decoration: BoxDecoration(
-                  color: const Color.fromARGB(150, 255, 255, 255),
-                  borderRadius: BorderRadius.circular(50),
-                  boxShadow: const [
-                    BoxShadow(color: Colors.transparent, blurRadius: 5)
-                  ]),
-              child: IconButton(
-                  onPressed: () {
-                    refresh();
-                  },
-                  icon: const Icon(
-                    Icons.refresh,
-                    size: 50,
-                    color: Colors.redAccent,
-                  )),
-            ),
-          ),
-          Positioned(
-            right: 0,
-            bottom: 130,
-            child: Container(
-              decoration: BoxDecoration(
-                  color: const Color.fromARGB(150, 255, 255, 255),
-                  borderRadius: BorderRadius.circular(50),
-                  boxShadow: const [
-                    BoxShadow(color: Colors.transparent, blurRadius: 5)
-                  ]),
-              child: IconButton(
-                  onPressed: () {
-                    messageViewController.animateTo(
-                      0,
-                      duration: const Duration(seconds: 1),
-                      curve: Curves.easeInOut,
+    )
+    ..loadRequest(Uri.parse('https://www.res.jeanhua.cn/'));
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return Stack(
+      children: [
+        Expanded(child: WebViewWidget(controller: webviewController)),
+        Positioned(
+          right: 0,
+          bottom: 50,
+          child: Container(
+            decoration: BoxDecoration(
+                color: const Color.fromARGB(150, 255, 255, 255),
+                borderRadius: BorderRadius.circular(50),
+                boxShadow: const [
+                  BoxShadow(color: Colors.transparent, blurRadius: 5)
+                ]),
+            child: IconButton(
+                onPressed: () {
+                  // 跳转原帖
+                  launchUrl(Uri.parse("https://www.res.jeanhua.cn/"));
+                  Clipboard.setData(const ClipboardData(text: "https://www.res.jeanhua.cn/")).then((_) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('已复制链接到粘贴板!')),
                     );
-                  },
-                  icon: const Icon(
-                    Icons.arrow_upward,
-                    size: 50,
-                    color: Colors.redAccent,
-                  )),
-            ),
+                  });
+                },
+                icon: const Icon(
+                  Icons.remove_red_eye,
+                  size: 50,
+                  color: Colors.redAccent,
+                )),
           ),
-        ],
+        )
+      ],
+    );
+  }
+}
+
+class galleryPage extends StatefulWidget{
+  const galleryPage({super.key});
+  @override
+  State<StatefulWidget> createState() {
+    // TODO: implement createState
+    return galleryPageState();
+  }
+}
+
+class galleryPageState extends State<galleryPage>{
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+  var webviewController = WebViewController()
+    ..setJavaScriptMode(JavaScriptMode.unrestricted)
+    ..setNavigationDelegate(
+      NavigationDelegate(
+        onProgress: (int progress) {
+          // Update loading bar.
+        },
+        onPageStarted: (String url) {},
+        onPageFinished: (String url) {},
+        onHttpError: (HttpResponseError error) {},
+        onWebResourceError: (WebResourceError error) {},
+        onNavigationRequest: (NavigationRequest request) {
+          return NavigationDecision.navigate;
+        },
       ),
+    )
+    ..loadRequest(Uri.parse('http://gallery.jeanhua.cn'));
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return Stack(
+      children: [
+        Expanded(child: WebViewWidget(controller: webviewController)),
+        Positioned(
+          right: 0,
+          bottom: 50,
+          child: Container(
+            decoration: BoxDecoration(
+                color: const Color.fromARGB(150, 255, 255, 255),
+                borderRadius: BorderRadius.circular(50),
+                boxShadow: const [
+                  BoxShadow(color: Colors.transparent, blurRadius: 5)
+                ]),
+            child: IconButton(
+                onPressed: () {
+                  // 跳转原帖
+                  launchUrl(Uri.parse("http://gallery.jeanhua.cn"));
+                  Clipboard.setData(const ClipboardData(text: "http://gallery.jeanhua.cn")).then((_) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('已复制链接到粘贴板!')),
+                    );
+                  });
+                },
+                icon: const Icon(
+                  Icons.remove_red_eye,
+                  size: 50,
+                  color: Colors.redAccent,
+                )),
+          ),
+        )
+      ],
     );
   }
 }

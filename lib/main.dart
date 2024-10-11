@@ -45,7 +45,7 @@ class IndexPageState extends State<IndexPage>{
     ),
     const BottomNavigationBarItem(
         backgroundColor: Colors.blue,
-        icon: Icon(Icons.money),
+        icon: Icon(Icons.image),
         label: "画廊"
     ),
   ];
@@ -390,7 +390,7 @@ class resPageState extends State<resPage>{
     // TODO: implement build
     return Stack(
       children: [
-        Expanded(child: WebViewWidget(controller: webviewController)),
+        WebViewWidget(controller: webviewController),
         Positioned(
           right: 0,
           bottom: 50,
@@ -462,7 +462,7 @@ class galleryPageState extends State<galleryPage>{
     // TODO: implement build
     return Stack(
       children: [
-        Expanded(child: WebViewWidget(controller: webviewController)),
+        WebViewWidget(controller: webviewController),
         Positioned(
           right: 0,
           bottom: 50,

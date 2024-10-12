@@ -298,6 +298,7 @@ class DetailPageState extends State<DetailPage> {
                                     ListView.builder(
                                       itemCount: (remark['reply'] as List).length,
                                         shrinkWrap: true,
+                                        physics: const NeverScrollableScrollPhysics(),
                                         itemBuilder: (context,index1){
                                         return Padding(
                                           padding: const EdgeInsets.all(2),
@@ -349,6 +350,7 @@ class DetailPageState extends State<DetailPage> {
                                                 ),
                                                 ListView.builder(
                                                   shrinkWrap: true,
+                                                    physics: const NeverScrollableScrollPhysics(),
                                                     itemCount: reply_detail.containsKey("${remark['id']}")?(reply_detail["${remark['id']}"] as List).length:0,
                                                     itemBuilder: (context,index2){
                                                       return Padding(

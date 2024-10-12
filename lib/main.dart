@@ -242,7 +242,8 @@ class marketPageState extends State<marketPage> {
                 Row(
                   children: [
                     const Icon(Icons.remove_red_eye),
-                    Text("${message['reading']}次浏览"),
+                    Text("${message['reading']}次浏览 "),
+                    Text(Core.timeAgo(message['created_at'])),
                     Expanded(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,

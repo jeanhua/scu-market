@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:photo_view/photo_view.dart';
 
+import 'Core.dart';
+
 class DetailPage extends StatefulWidget {
   const DetailPage({super.key, required this.detail});
   final dynamic detail;
@@ -20,12 +22,19 @@ class DetailPageState extends State<DetailPage> {
   DetailPageState({required this.message});
   final dynamic message;
   var remarks = [];
+  var reply_detail = {};
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    getRemarks();
+    getRemarks().then((value) async {
+      for(var remark in remarks){
+        reply_detail["${remark['id']}"] = await Core.getReplyDetail("${message['id']}", "${remark['id']}");
+      }
+      setState(() {
+      });
+    });
   }
 
   void notice_dialog(String noticeText, [String title = "提示"]) {
@@ -142,9 +151,8 @@ class DetailPageState extends State<DetailPage> {
                         child: Row(
                           children: [
                             Expanded(
-                                child: Text(
+                                child: SelectableText(
                                   "${message["content"]}",
-                                  overflow: TextOverflow.fade,
                                   style: const TextStyle(fontSize: 18),
                                 ))
                           ],
@@ -208,7 +216,8 @@ class DetailPageState extends State<DetailPage> {
                       Row(
                         children: [
                           const Icon(Icons.remove_red_eye),
-                          Text("${message['reading']}次浏览"),
+                          Text("${message['reading']} "),
+                          Text(Core.timeAgo(message['created_at'])),
                           Expanded(
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
@@ -277,15 +286,129 @@ class DetailPageState extends State<DetailPage> {
                                     Row(
                                       children: [
                                         Expanded(
-                                            child: Text(
+                                            child: SelectableText(
                                               "${remark['content']}",
-                                              overflow: TextOverflow.fade,
                                               style: const TextStyle(
                                                 fontSize: 15,
                                               ),
                                             ))
                                       ],
                                     ),
+                                    // 评论回复
+                                    ListView.builder(
+                                      itemCount: (remark['reply'] as List).length,
+                                        shrinkWrap: true,
+                                        itemBuilder: (context,index1){
+                                        return Padding(
+                                          padding: const EdgeInsets.all(2),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                                color: Colors.white54,
+                                                borderRadius: BorderRadius.circular(10)),
+                                            child: Column(
+                                              children: [
+                                                Row(
+                                                  mainAxisAlignment: MainAxisAlignment.start,
+                                                  children: [
+                                                    SizedBox(
+                                                      width: 30,
+                                                      height: 30,
+                                                      child: ClipRRect(
+                                                        borderRadius: BorderRadius.circular(15),
+                                                        child: Image.network(
+                                                          remark['reply'][index1]['from_user']['portrait'],
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      "${remark['reply'][index1]['from_user']['nickname']} ",
+                                                      style: const TextStyle(
+                                                          fontSize: 20,
+                                                          color: Colors.blueAccent),
+                                                    ),
+                                                    Text(
+                                                      "${remark['reply'][index1]['from_user']["leaver_name"]}",
+                                                      style: const TextStyle(
+                                                        color: Colors.black,
+                                                        backgroundColor: Colors.green,
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    Expanded(
+                                                        child: SelectableText(
+                                                          "回复${remark['reply'][index1]['to_user']['nickname']}：${remark['reply'][index1]['content']}",
+                                                          style: const TextStyle(
+                                                            fontSize: 15,
+                                                          ),
+                                                        ))
+                                                  ],
+                                                ),
+                                                ListView.builder(
+                                                  shrinkWrap: true,
+                                                    itemCount: reply_detail.containsKey("${remark['id']}")?(reply_detail["${remark['id']}"] as List).length:0,
+                                                    itemBuilder: (context,index2){
+                                                      return Padding(
+                                                        padding: const EdgeInsets.all(2),
+                                                        child: Container(
+                                                          decoration: BoxDecoration(
+                                                              color: Colors.white54,
+                                                              borderRadius: BorderRadius.circular(10)),
+                                                          child: Column(
+                                                            children: [
+                                                              Row(
+                                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                                children: [
+                                                                  SizedBox(
+                                                                    width: 30,
+                                                                    height: 30,
+                                                                    child: ClipRRect(
+                                                                      borderRadius: BorderRadius.circular(15),
+                                                                      child: Image.network(
+                                                                        reply_detail['${remark['id']}'][index2]['from_user']['portrait'],
+                                                                        fit: BoxFit.cover,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  Text(
+                                                                    "${reply_detail['${remark['id']}'][index2]['from_user']['nickname']} ",
+                                                                    style: const TextStyle(
+                                                                        fontSize: 20,
+                                                                        color: Colors.blueAccent),
+                                                                  ),
+                                                                  Text(
+                                                                    "${reply_detail['${remark['id']}'][index2]['from_user']['leaver_name']}",
+                                                                    style: const TextStyle(
+                                                                      color: Colors.black,
+                                                                      backgroundColor: Colors.green,
+                                                                    ),
+                                                                  )
+                                                                ],
+                                                              ),
+                                                              Row(
+                                                                children: [
+                                                                  Expanded(
+                                                                      child: SelectableText(
+                                                                        "回复${reply_detail['${remark['id']}'][index2]['to_user']['nickname']}：${reply_detail['${remark['id']}'][index2]['content']}",
+                                                                        style: const TextStyle(
+                                                                          fontSize: 15,
+                                                                        ),
+                                                                      ))
+                                                                ],
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      );
+                                                    })
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                    })
                                   ],
                                 ),
                               ),
